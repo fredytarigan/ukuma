@@ -7,37 +7,14 @@ log:
 
 push:
   url: https://push.ukuma.io/api/push
-  default_status: up
-  default_msg: "ukuma"
 
 checks:
-  - id: example-http
-    push_token: push_token_http
-    type: http
-    url: "http://google.com/generate_204"
-    method: GET
-    expected_status: [200]
-    timeout: 5000
-    follow_redirects: true
-
-  - id: example-https
-    push_token: push_token_https
-    type: https
-    url: "https://google.com"
-    method: GET
-    expected_status: [200, 204]
-    timeout: 5000
-    insecure_skip_verify: true
-
-  - id: example-tcp
-    push_token: push_token_tcp
-    type: tcp
-    host: "127.0.0.1"
-    port: 80
-    timeout: 3000
-
-  - id: example-ping
-    push_token: push_token_ping
-    type: ping
+  - id: example-ping-a
+    push_token: push_token_a
     host: "127.0.0.1"
     timeout: 2000
+
+  - id: example-ping-b
+    push_token: push_token_b
+    host: "1.1.1.1"
+    timeout: 3000

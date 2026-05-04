@@ -1,4 +1,4 @@
-//! Background check runner: runs probes on an interval and pushes each result to its own Uptime Kuma Push monitor.
+//! Background runner: ICMP ping targets on an interval, then pushes each result to its own Uptime Kuma Push monitor.
 
 mod checks;
 mod push;
