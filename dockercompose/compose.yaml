@@ -1,0 +1,11 @@
+services:
+  ukuma:
+    user: "1000:1000"
+    image: ukuma:latest
+    environment:
+      SERVER_HOST: "0.0.0.0"
+    volumes:
+      - ./config/config.yaml:/app/config/config.yaml:ro
+    ports:
+      - 8115:8115
+    restart: "always"
