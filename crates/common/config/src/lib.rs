@@ -2,7 +2,7 @@ mod config;
 mod types;
 
 pub use config::{read_from_path, read_from_str, LoadError};
-pub use types::{AgentConfig, AppConfig, CheckEntry, CheckProbe, PushConfig};
+pub use types::{AgentConfig, AppConfig, CheckEntry, PushConfig};
 
 #[cfg(test)]
 mod tests {
@@ -19,24 +19,12 @@ mod tests {
         let cfg = read_from_path(example_path()).expect("example config should parse");
         assert_eq!(cfg.agent.interval, 60);
         assert_eq!(cfg.push.url, "https://push.ukuma.io/api/push");
-        assert_eq!(cfg.checks.len(), 4);
-        assert_eq!(cfg.checks[0].push_token, "push_token_http");
+        assert_eq!(cfg.checks.len(), 2);
 
-        match &cfg.checks[0].probe {
-            CheckProbe::Http {
-                url,
-                method,
-                expected_status,
-                timeout,
-                follow_redirects,
-            } => {
-                assert!(url.contains("generate_204"));
-                assert_eq!(method, "GET");
-                assert_eq!(expected_status, &[200]);
-                assert_eq!(*timeout, 5000);
-                assert!(*follow_redirects);
-            }
-            _ => panic!("first check should be http"),
-        }
+        let first = &cfg.checks[0];
+        assert_eq!(first.id, "example-ping-a");
+        assert_eq!(first.push_token, "push_token_a");
+        assert_eq!(first.host, "127.0.0.1");
+        assert_eq!(first.timeout, 2000);
     }
 }

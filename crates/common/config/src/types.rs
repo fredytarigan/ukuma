@@ -24,56 +24,14 @@ pub struct LogConfig {
 pub struct PushConfig {
     /// e.g. `https://your-kuma.example.com/api/push`
     pub url: String,
-    pub default_status: String,
-    pub default_msg: String,
 }
 
-/// One logical monitor: identity, dedicated UK push token, and probe settings.
+/// One ICMP target: identity, dedicated UK push token, and ping settings.
 #[derive(Debug, Clone, Deserialize)]
 pub struct CheckEntry {
     pub id: String,
     /// Uptime Kuma push token for this monitor (from the Push monitor URL).
     pub push_token: String,
-    #[serde(flatten)]
-    pub probe: CheckProbe,
-}
-
-#[derive(Debug, Clone, Deserialize)]
-#[serde(tag = "type", rename_all = "lowercase")]
-pub enum CheckProbe {
-    Http {
-        url: String,
-        #[serde(default = "default_method")]
-        method: String,
-        expected_status: Vec<u16>,
-        timeout: u64,
-        #[serde(default = "default_true")]
-        follow_redirects: bool,
-    },
-    Https {
-        url: String,
-        #[serde(default = "default_method")]
-        method: String,
-        expected_status: Vec<u16>,
-        timeout: u64,
-        #[serde(default)]
-        insecure_skip_verify: bool,
-    },
-    Tcp {
-        host: String,
-        port: u16,
-        timeout: u64,
-    },
-    Ping {
-        host: String,
-        timeout: u64,
-    },
-}
-
-fn default_method() -> String {
-    "GET".to_string()
-}
-
-fn default_true() -> bool {
-    true
+    pub host: String,
+    pub timeout: u64,
 }
