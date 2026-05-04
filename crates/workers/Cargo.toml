@@ -1,0 +1,21 @@
+[package]
+name = "workers"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+version.workspace = true
+authors.workspace = true
+description.workspace = true
+documentation.workspace = true
+
+[dependencies]
+anyhow = "1.0"
+app_config = { package = "config", path = "../common/config" }
+futures = "0.3"
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
+surge-ping = "0.8.4"
+tokio = { version = "1.51", features = ["net", "time", "macros"] }
+tracing = "0.1"
+
+[lints]
+workspace = true

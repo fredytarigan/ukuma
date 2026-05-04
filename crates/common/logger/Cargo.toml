@@ -1,0 +1,17 @@
+[package]
+name = "logger"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+version.workspace = true
+authors.workspace = true
+description.workspace = true
+documentation.workspace = true
+
+[dependencies]
+tracing = { version = "0.1" }
+tracing-subscriber = { version = "0.3", features = ["default", "fmt", "json", "env-filter"] }
+color-eyre = { version = "0.6" }
+
+[lints]
+workspace = true

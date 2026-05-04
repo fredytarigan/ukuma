@@ -1,0 +1,34 @@
+[package]
+name = "cmd"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+version.workspace = true
+authors.workspace = true
+description.workspace = true
+documentation.workspace = true
+
+[dependencies]
+tokio = { version = "1.51", features = ["rt-multi-thread", "macros", "signal"] }
+anyhow = { version = "1.0" }
+dotenvy = { version = "0.15" }
+tracing = { version = "0.1" }
+axum = { version = "0.8" }
+tower = { version = "0.5" }
+tower-http = { version = "0.6", features = ["timeout", "normalize-path", "catch-panic", "trace"] }
+tower-layer = { version = "0.3" }
+tower-default-headers = { git = "https://github.com/banool/tower-default-headers-rs.git" }
+serde_json = { version = "1.0" }
+http-body-util = { version = "0.1" }
+
+## dependencies from internal
+app_config = { package = "config", path = "../common/config" }
+app_logger = { package = "logger", path = "../common/logger" }
+workers = { path = "../workers" }
+
+[lints]
+workspace = true
+
+[[bin]]
+name = "ukuma"
+path = "src/bin/server.rs"
