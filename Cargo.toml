@@ -1,0 +1,22 @@
+[workspace]
+resolver = "2"
+members = ["crates/cmd", "crates/common/config", "crates/common/logger", "crates/workers"]
+
+[workspace.package]
+edition = "2024"
+rust-version = "1.95"
+license = "GNU GENERAL PUBLIC LICENSE v3"
+version = "0.0.1"
+authors = [
+    "Fredy Samuel B Tarigan <fredy@tarigan.id>",
+]
+description = "Uptime Kuma Push Agent"
+documentation = "https://github.com/fredytarigan/ukuma"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1

@@ -1,0 +1,40 @@
+---
+agent:
+  interval: 60
+
+log:
+  level: info
+
+push:
+  url: https://push.ukuma.io
+  token: your_token_here
+  default_status: up
+  default_msg: "ukuma"
+
+checks:
+  - id: example-http
+    type: http
+    url: "http://google.com/generate_204"
+    method: GET
+    expected_status: [200]
+    timeout: 5000
+    follow_redirects: true
+
+  - id: example-https
+    type: https
+    url: "https://google.com"
+    method: GET
+    expected_status: [200, 204]
+    timeout: 5000
+    insecure_skip_verify: true
+
+  - id: example-tcp
+    type: tcp
+    host: "127.0.0.1"
+    port: 80
+    timeout: 3000
+
+  - id: example-ping
+    type: ping
+    host: "127.0.0.1"
+    timeout: 2000
