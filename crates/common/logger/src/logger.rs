@@ -1,4 +1,4 @@
-use tracing::{Level, info};
+use tracing::info;
 use tracing_subscriber::{Registry, fmt::writer::MakeWriterExt, layer::SubscriberExt};
 
 use crate::Logger;

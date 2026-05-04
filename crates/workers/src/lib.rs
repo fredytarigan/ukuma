@@ -1,4 +1,4 @@
-//! Background check runner: runs configured probes on an interval and pushes status to Uptime Kuma.
+//! Background check runner: runs probes on an interval and pushes each result to its own Uptime Kuma Push monitor.
 
 mod checks;
 mod push;
@@ -10,22 +10,45 @@ use app_config::AppConfig;
 use tokio::task::JoinHandle;
 use tracing::{debug, error, warn};
 
-pub use checks::{CheckRun, run_all_checks};
+pub use checks::{CheckRun, run_all_entries, run_entry};
 
-/// Runs one full cycle: all checks in parallel, then a single push with aggregate result.
+/// Runs one full cycle: for every check, run the probe then push to that monitor’s push URL (in parallel across checks).
 pub async fn run_once(config: &AppConfig) -> anyhow::Result<()> {
-    let runs = run_all_checks(&config.checks).await;
-    if !runs.iter().all(|r| r.ok) {
-        for run in &runs {
-            if !run.ok {
-                warn!(id = %run.id, detail = %run.detail, "check failed");
+    let push = config.push.clone();
+    let futures: Vec<_> = config
+        .checks
+        .iter()
+        .cloned()
+        .map(move |entry| {
+            let push = push.clone();
+            async move {
+                let run = checks::run_entry(&entry).await;
+                if !run.ok {
+                    warn!(id = %run.id, detail = %run.detail, "check failed");
+                }
+                let push_res =
+                    push::send_push_for_check(&push, entry.push_token.as_str(), &run).await;
+                (run, push_res)
             }
+        })
+        .collect();
+
+    let outcomes = futures::future::join_all(futures).await;
+    let mut failed_pushes = Vec::new();
+
+    for (run, res) in outcomes {
+        if let Err(e) = res {
+            error!(id = %run.id, error = %e, "push failed");
+            failed_pushes.push(format!("{}: {e}", run.id));
         }
-    } else {
-        debug!(checks = config.checks.len(), "all checks passed");
     }
 
-    push::send_push(config, &runs).await
+    if failed_pushes.is_empty() {
+        debug!(checks = config.checks.len(), "check cycle finished");
+        Ok(())
+    } else {
+        Err(anyhow::anyhow!(failed_pushes.join("; ")))
+    }
 }
 
 /// Spawns a task that runs [`run_once`] every `config.agent.interval` seconds until aborted.
