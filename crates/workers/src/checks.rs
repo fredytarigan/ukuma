@@ -1,10 +1,11 @@
 use std::net::IpAddr;
 use std::time::{Duration, Instant};
 
-use app_config::Check;
+use app_config::{CheckEntry, CheckProbe};
 use reqwest::header;
 use reqwest::{Method, redirect};
 use tokio::net::TcpStream;
+
 #[derive(Debug, Clone)]
 pub struct CheckRun {
     pub id: String,
@@ -13,10 +14,10 @@ pub struct CheckRun {
     pub detail: String,
 }
 
-pub async fn run_check(check: &Check) -> CheckRun {
-    match check {
-        Check::Http {
-            id,
+pub async fn run_entry(entry: &CheckEntry) -> CheckRun {
+    let id = entry.id.as_str();
+    match &entry.probe {
+        CheckProbe::Http {
             url,
             method,
             expected_status,
@@ -34,15 +35,13 @@ pub async fn run_check(check: &Check) -> CheckRun {
             )
             .await
         }
-        Check::Https {
-            id,
+        CheckProbe::Https {
             url,
             method,
             expected_status,
             timeout,
             insecure_skip_verify,
         } => {
-            // HTTPS entries do not yet carry `follow_redirects`; follow a small redirect chain by default.
             run_http_like(
                 id,
                 url,
@@ -54,13 +53,12 @@ pub async fn run_check(check: &Check) -> CheckRun {
             )
             .await
         }
-        Check::Tcp {
-            id,
+        CheckProbe::Tcp {
             host,
             port,
             timeout,
         } => run_tcp(id, host, *port, *timeout).await,
-        Check::Ping { id, host, timeout } => run_ping(id, host, *timeout).await,
+        CheckProbe::Ping { host, timeout } => run_ping(id, host, *timeout).await,
     }
 }
 
@@ -218,7 +216,7 @@ async fn resolve_host(host: &str) -> Result<IpAddr, String> {
         .ok_or_else(|| format!("no addresses found for {host}"))
 }
 
-pub async fn run_all_checks(checks: &[Check]) -> Vec<CheckRun> {
-    let futures: Vec<_> = checks.iter().map(run_check).collect();
+pub async fn run_all_entries(entries: &[CheckEntry]) -> Vec<CheckRun> {
+    let futures: Vec<_> = entries.iter().map(run_entry).collect();
     futures::future::join_all(futures).await
 }

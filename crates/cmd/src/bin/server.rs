@@ -47,7 +47,7 @@ async fn main() -> Result<()> {
 
     // initializing application logger
     println!("initializing application logger");
-    let logger = app_logger::Logger { level: level };
+    let logger = app_logger::Logger { level };
     logger.setup()?;
     info!("application logger initialized successfully");
 

@@ -5,7 +5,7 @@ pub struct AppConfig {
     pub agent: AgentConfig,
     pub log: LogConfig,
     pub push: PushConfig,
-    pub checks: Vec<Check>,
+    pub checks: Vec<CheckEntry>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -19,19 +19,29 @@ pub struct LogConfig {
     pub level: String,
 }
 
+/// Shared Uptime Kuma push API base (no monitor token). Each check supplies its own token.
 #[derive(Debug, Clone, Deserialize)]
 pub struct PushConfig {
+    /// e.g. `https://your-kuma.example.com/api/push`
     pub url: String,
-    pub token: String,
     pub default_status: String,
     pub default_msg: String,
 }
 
+/// One logical monitor: identity, dedicated UK push token, and probe settings.
+#[derive(Debug, Clone, Deserialize)]
+pub struct CheckEntry {
+    pub id: String,
+    /// Uptime Kuma push token for this monitor (from the Push monitor URL).
+    pub push_token: String,
+    #[serde(flatten)]
+    pub probe: CheckProbe,
+}
+
 #[derive(Debug, Clone, Deserialize)]
 #[serde(tag = "type", rename_all = "lowercase")]
-pub enum Check {
+pub enum CheckProbe {
     Http {
-        id: String,
         url: String,
         #[serde(default = "default_method")]
         method: String,
@@ -41,7 +51,6 @@ pub enum Check {
         follow_redirects: bool,
     },
     Https {
-        id: String,
         url: String,
         #[serde(default = "default_method")]
         method: String,
@@ -51,13 +60,11 @@ pub enum Check {
         insecure_skip_verify: bool,
     },
     Tcp {
-        id: String,
         host: String,
         port: u16,
         timeout: u64,
     },
     Ping {
-        id: String,
         host: String,
         timeout: u64,
     },
